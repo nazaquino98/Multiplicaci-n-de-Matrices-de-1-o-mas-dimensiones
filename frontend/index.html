@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Multiplicación de Matrices</title>
+</head>
+<body>
+    <h1>Multiplicación de Matrices</h1>
+    
+    <label for="filas">Filas:</label>
+    <input type="number" id="filas" value="2">
+    
+    <label for="columnas">Columnas:</label>
+    <input type="number" id="columnas" value="2">
+    
+    <button onclick="generarMatrices()">Generar Matrices</button>
+    <button onclick="multiplicarMatrices()">Multiplicar Matrices</button>
+    
+    <div id="matrices"></div>
+    <div id="resultado"></div>
+
+    <script>
+        let filas, columnas;
+
+        function generarMatrices() {
+            filas = parseInt(document.getElementById('filas').value);
+            columnas = parseInt(document.getElementById('columnas').value);
+
+            const contenedor = document.getElementById('matrices');
+            contenedor.innerHTML = '';
+
+            for (let m = 1; m <= 2; m++) {
+                const matrizDiv = document.createElement('div');
+                matrizDiv.innerHTML = `<h3>Matriz ${m}</h3>`;
+
+                for (let i = 0; i < filas; i++) {
+                    for (let j = 0; j < columnas; j++) {
+                        matrizDiv.innerHTML += `<input type="number" id="Matriz ${m}_${i}_${j}" value="0">`;
+                    }
+                    matrizDiv.innerHTML += '<br>';
+                }
+                contenedor.appendChild(matrizDiv);
+            }
+        }
+
+        async function multiplicarMatrices() {
+            const backendUrl = 'http://localhost:3000/multiplicar';
+
+            const matriz1 = [];
+            const matriz2 = [];
+
+            for (let i = 0; i < filas; i++) {
+                const fila1 = [];
+                const fila2 = [];
+                for (let j = 0; j < columnas; j++) {
+                    const val1 = parseInt(document.getElementById(`Matriz 1_${i}_${j}`).value);
+                    const val2 = parseInt(document.getElementById(`Matriz 2_${i}_${j}`).value);
+
+                    if (isNaN(val1) || isNaN(val2)) {
+                        alert("Completa todos los campos con números.");
+                        return;
+                    }
+
+                    fila1.push(val1);
+                    fila2.push(val2);
+                }
+                matriz1.push(fila1);
+                matriz2.push(fila2);
+            }
+
+            const response = await fetch(backendUrl, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ matriz1, matriz2 })
+            });
+
+            const data = await response.json();
+            mostrarResultado(data.resultado);
+        }
+
+        function mostrarResultado(resultado) {
+            const resultadoDiv = document.getElementById('resultado');
+            resultadoDiv.innerHTML = '<h3>Resultado:</h3>';
+            resultado.forEach(fila => {
+                resultadoDiv.innerHTML += fila.join(' ') + '<br>';
+            });
+        }
+    </script>
+</body>
+</html>
